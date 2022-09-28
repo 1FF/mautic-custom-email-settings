@@ -41,6 +41,7 @@ class CustomEmailSettingController extends CommonController
         if ($this->request->getMethod() == 'POST') {
             $emailId = $this->request->get('email_id');
             $key = $this->request->get('replace_api_key');
+            $service = $this->request->get('replace_service');
 
             if (empty($key)) {
                 $this->service->deleteCustomApiKey($emailId);
@@ -49,7 +50,7 @@ class CustomEmailSettingController extends CommonController
                 return $this->redirectToRoute('mautic_custom_email_settings_index');
             }
 
-            $this->service->addCustomApiKey($emailId, $key);
+            $this->service->addCustomApiKey($emailId, $key, $service);
             $this->flashBag->add('API key for email #' . $emailId . ' added');
 
             return $this->redirectToRoute('mautic_custom_email_settings_index');
