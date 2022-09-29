@@ -19,7 +19,6 @@ class CustomEmailSettingsBundle extends AbstractPluginBundle
         $container->addCompilerPass(new OverrideSparkpostTransportPass());
         $container->addCompilerPass(new OverrideSendgridApiTransportPass());
         $container->addCompilerPass(new OverrideSendGridApiFacadePass());
-        $container->addCompilerPass(new OverrideSendGridWrapperPass());
 
         parent::build($container);
     }
