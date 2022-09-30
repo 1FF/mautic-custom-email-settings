@@ -5,7 +5,6 @@ namespace MauticPlugin\CustomEmailSettingsBundle;
 use Mautic\IntegrationsBundle\Bundle\AbstractPluginBundle;
 use MauticPlugin\CustomEmailSettingsBundle\DependencyInjection\Compiler\OverrideSendGridApiFacadePass;
 use MauticPlugin\CustomEmailSettingsBundle\DependencyInjection\Compiler\OverrideSendgridApiTransportPass;
-use MauticPlugin\CustomEmailSettingsBundle\DependencyInjection\Compiler\OverrideSendGridWrapperPass;
 use MauticPlugin\CustomEmailSettingsBundle\DependencyInjection\Compiler\OverrideSparkpostTransportPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 

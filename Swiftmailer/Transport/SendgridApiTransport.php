@@ -10,7 +10,7 @@ use Swift_Events_EventListener;
 use Swift_Mime_SimpleMessage;
 use Symfony\Component\HttpFoundation\Request;
 
-class OverrideSendgridApiTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
+class SendgridApiTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
 {
     /**
      * @var SendGridApiFacade
