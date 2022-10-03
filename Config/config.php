@@ -36,7 +36,8 @@ return [
                 'class' => \MauticPlugin\CustomEmailSettingsBundle\Controller\CustomEmailSettingController::class,
                 'arguments' => [
                     'mautic.custom.email.settings.service',
-                    'mautic.core.service.flashbag'
+                    'mautic.core.service.flashbag',
+                    '%mautic.mailer_custom_default_transport%',
                 ]
             ]
         ],
@@ -51,6 +52,7 @@ return [
                 'arguments' => [
                     'mautic.transport.sparkpost',
                     'mautic.transport.sendgrid_api',
+                    'mautic.custom.email.settings.service',
                     '%mautic.mailer_custom_default_transport%',
                 ],
                 'tagArguments' => [

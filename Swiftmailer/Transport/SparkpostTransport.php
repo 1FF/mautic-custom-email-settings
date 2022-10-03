@@ -195,7 +195,7 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
             }
 
             $campaignId = $this->extractCampaignId($metadataSet);
-            $emailId = $this->extractEmailId($metadataSet);
+            $emailId = MultipleServicesTransport::getEmailId($message);
         }
 
         $message = $this->messageToArray($mauticTokens, $mergeVarPlaceholders, true);
@@ -524,14 +524,6 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
         }
 
         return substr($id, 0, 64);
-    }
-
-    private function extractEmailId(array $metadataSet)
-    {
-        $id = '';
-        if (!empty($metadataSet['emailId']))  $id = $metadataSet['emailId'];
-
-        return $id;
     }
 
     /**

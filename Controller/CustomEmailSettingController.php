@@ -8,14 +8,21 @@ use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
 
 class CustomEmailSettingController extends CommonController
 {
-    private $service;
+    private CustomEmailSettingsService $service;
 
-    private $flashBag;
+    private FlashBag $flashBag;
 
-    public function __construct(CustomEmailSettingsService $service, FlashBag $flashBag)
+    private string $defaultTransport;
+
+    public function __construct(
+        CustomEmailSettingsService $service,
+        FlashBag $flashBag,
+        string $defaultTransport
+    )
     {
         $this->service = $service;
         $this->flashBag = $flashBag;
+        $this->defaultTransport = $defaultTransport;
     }
 
     public function indexAction()
@@ -29,7 +36,8 @@ class CustomEmailSettingController extends CommonController
             [
                 'viewParameters' => [
                     'items' => $emails,
-                    'keys' => $keys
+                    'keys' => $keys,
+                    'defaultTransport' => $this->defaultTransport
                 ],
                 'contentTemplate' => 'CustomEmailSettingsBundle:Settings:list.html.php'
             ]
@@ -40,8 +48,8 @@ class CustomEmailSettingController extends CommonController
     {
         if ($this->request->getMethod() == 'POST') {
             $emailId = $this->request->get('email_id');
-            $key = $this->request->get('replace_api_key');
-            $service = $this->request->get('replace_service');
+            $key = $this->request->get('custom_api_key');
+            $transport = $this->request->get('custom_transport');
 
             if (empty($key)) {
                 $this->service->deleteCustomApiKey($emailId);
@@ -50,7 +58,7 @@ class CustomEmailSettingController extends CommonController
                 return $this->redirectToRoute('mautic_custom_email_settings_index');
             }
 
-            $this->service->addCustomApiKey($emailId, $key, $service);
+            $this->service->addCustomApiKey($emailId, $key, $transport);
             $this->flashBag->add('API key for email #' . $emailId . ' added');
 
             return $this->redirectToRoute('mautic_custom_email_settings_index');

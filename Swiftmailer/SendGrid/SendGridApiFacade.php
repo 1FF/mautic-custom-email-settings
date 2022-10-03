@@ -9,6 +9,7 @@ use Mautic\EmailBundle\Swiftmailer\SendGrid\SendGridApiResponse;
 use Mautic\EmailBundle\Swiftmailer\SendGrid\SendGridWrapper;
 use Mautic\EmailBundle\Swiftmailer\SwiftmailerFacadeInterface;
 use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
+use MauticPlugin\CustomEmailSettingsBundle\Swiftmailer\Transport\MultipleServicesTransport;
 
 class SendGridApiFacade implements SwiftmailerFacadeInterface
 {
@@ -48,7 +49,7 @@ class SendGridApiFacade implements SwiftmailerFacadeInterface
      */
     public function send(\Swift_Mime_SimpleMessage $message)
     {
-        $emailId = $this->getEmailId($message);
+        $emailId = MultipleServicesTransport::getEmailId($message);
         $customApiKey = null;
 
         if ($emailId) {
@@ -78,18 +79,6 @@ class SendGridApiFacade implements SwiftmailerFacadeInterface
         } catch (SendGridBadRequestException $e) {
             throw new \Swift_TransportException($e->getMessage());
         }
-    }
-
-    protected function getEmailId(\Swift_Mime_SimpleMessage $message)
-    {
-        $metadata = $message->getMetadata();
-        $mSet = [];
-
-        if (!empty($metadata)) $mSet = reset($metadata);
-
-        if (isset($mSet['emailId']))  return (int) $mSet['emailId'];
-
-        return null;
     }
 
     protected function replaceApiKey($apiKey)

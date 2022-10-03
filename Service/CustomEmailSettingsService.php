@@ -8,7 +8,7 @@ class CustomEmailSettingsService
 {
     private string $settingsFile = __DIR__.'/../Config/email_keys_settings.json';
 
-    public function addCustomApiKey(int $id, string $key, string $service)
+    public function addCustomApiKey(int $id, string $key, string $transport)
     {
         if (!$settings = json_decode(file_get_contents($this->settingsFile), true)) {
             $settings = [];
@@ -16,7 +16,7 @@ class CustomEmailSettingsService
 
         $settings[$id] = [
             "key" => $key,
-            "service" => $service
+            "transport" => $transport
         ];
 
         file_put_contents($this->settingsFile, json_encode($settings, JSON_PRETTY_PRINT));
@@ -33,13 +33,13 @@ class CustomEmailSettingsService
         return array_key_exists($id, $settings) ? $settings[$id]['key'] : null;
     }
 
-    public function getCustomService(int $id)
+    public function getCustomTransport(int $id)
     {
         $settings = json_decode(file_get_contents($this->settingsFile), true);
 
         if (!$settings) return null;
 
-        return array_key_exists($id, $settings) ? $settings[$id]['service'] : null;
+        return array_key_exists($id, $settings) ? $settings[$id]['transport'] : null;
     }
 
     public function deleteCustomApiKey(int $id): ?bool

@@ -72,15 +72,15 @@ $view['slots']->set('headerTitle', 'Email API Keys');
             <td><?php echo $item->getFromAddress(); ?></td>
             <td><?php echo $item->getFromName(); ?></td>
             <td>
-              <select class="form-control" name="replace_service" id="replace_service">
-                <option value="">Not selected</option>
+              <select class="form-control" name="custom_transport" id="custom_transport">
+                <option value="<?= $defaultTransport ?>">Not selected</option>
                 <option
-                    <?php if ($keys[$item->getId()]['service'] == "mautic.transport.sendgrid_api"): ?> selected <?php endif; ?>
-                    value="mautic.transport.sendgrid_api">SendGrid - API
+                    <?php if ($keys[$item->getId()]['transport'] == "mautic.transport.sparkpost"): ?> selected <?php endif; ?>
+                    value="mautic.transport.sparkpost">Sparkpost
                 </option>
                 <option
-                    <?php if ($keys[$item->getId()]['service'] == "mautic.transport.sparkpost"): ?> selected <?php endif; ?>
-                    value="mautic.transport.sparkpost">Sparkpost
+                    <?php if ($keys[$item->getId()]['transport'] == "mautic.transport.sendgrid_api"): ?> selected <?php endif; ?>
+                    value="mautic.transport.sendgrid_api">SendGrid - API
                 </option>
               </select>
             </td>
@@ -88,7 +88,7 @@ $view['slots']->set('headerTitle', 'Email API Keys');
               <div class="col-md-8">
                 <input class="form-control" style="width: 100%;" type="text"
                        value="<?= isset($keys[$item->getId()]) ? $keys[$item->getId()]['key'] : '' ?>"
-                       name="replace_api_key"
+                       name="custom_api_key"
                        placeholder="API key - if not specified, will be used default">
               </div>
               <button type="submit" class="btn btn-primary">Confirm</button>
