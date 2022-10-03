@@ -9,7 +9,6 @@ use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
 use Symfony\Component\HttpFoundation\Request;
 use Swift_Events_EventListener;
 
-
 class MultipleServicesTransport extends AbstractTokenArrayTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
 {
     /**
