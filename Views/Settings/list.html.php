@@ -1,10 +1,22 @@
 <?php declare(strict_types=1);
+/** @var \Symfony\Component\PropertyAccess\PropertyAccess $accessor */
+/** @var array $keys */
+/** @var array $items */
+/** @var boolean $isIncorrectTransportSelected */
+/** @var string $defaultTransport */
+
 $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('headerTitle', 'Email API Keys');
 ?>
 
-<?php if (count($items)): ?>
+<?php if ($isIncorrectTransportSelected): ?>
+  <div class="alert alert-danger" role="alert">
+    To use custom API keys and transport, you must select "<b>Multiple Transport</b>"
+    in the system <a class="alert-link" href="/s/config/edit?tab=emailconfig">Email settings</a>
+  </div>
+<?php endif; ?>
 
+<?php if (count($items)): ?>
     <table class="table table-hover table-striped table-bordered email-list">
       <thead>
       <tr>
@@ -75,11 +87,15 @@ $view['slots']->set('headerTitle', 'Email API Keys');
               <select class="form-control" name="custom_transport" id="custom_transport">
                 <option value="<?= $defaultTransport ?>">Not selected</option>
                 <option
-                    <?php if ($keys[$item->getId()]['transport'] == "mautic.transport.sparkpost"): ?> selected <?php endif; ?>
+                    <?php if (isset($keys[$item->getId()])): ?>
+                        <?php if ($keys[$item->getId()]['transport'] == "mautic.transport.sparkpost"): ?> selected <?php endif; ?>
+                    <?php endif; ?>
                     value="mautic.transport.sparkpost">Sparkpost
                 </option>
                 <option
-                    <?php if ($keys[$item->getId()]['transport'] == "mautic.transport.sendgrid_api"): ?> selected <?php endif; ?>
+                    <?php if (isset($keys[$item->getId()])): ?>
+                        <?php if ($keys[$item->getId()]['transport'] == "mautic.transport.sendgrid_api"): ?> selected <?php endif; ?>
+                    <?php endif; ?>
                     value="mautic.transport.sendgrid_api">SendGrid - API
                 </option>
               </select>

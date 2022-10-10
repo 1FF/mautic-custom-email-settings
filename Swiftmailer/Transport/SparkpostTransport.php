@@ -130,7 +130,11 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
 
             $overrideApiKey = null;
 
-            if (!empty($sparkPostMessage['emailId']) && is_int($sparkPostMessage['emailId'])) {
+            if (
+                !empty($sparkPostMessage['emailId'])
+                && is_int($sparkPostMessage['emailId'])
+                && $this->customEmailSettingsService->getCurrentMailerTransport() == 'mautic.transport.multiple'
+            ) {
                 $overrideApiKey = $this->customEmailSettingsService->getCustomApiKey($sparkPostMessage['emailId']);
             }
 

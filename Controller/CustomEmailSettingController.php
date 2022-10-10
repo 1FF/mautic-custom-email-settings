@@ -31,13 +31,19 @@ class CustomEmailSettingController extends CommonController
         $repo = $em->getRepository('MauticEmailBundle:Email');
         $emails = $repo->findAll();
         $keys = $this->service->getAllCustomApiKeys();
+        $isIncorrectTransportSelected = false;
+
+        if ($this->service->getCurrentMailerTransport() != 'mautic.transport.multiple') {
+            $isIncorrectTransportSelected = true;
+        }
 
         return $this->delegateView(
             [
                 'viewParameters' => [
                     'items' => $emails,
                     'keys' => $keys,
-                    'defaultTransport' => $this->defaultTransport
+                    'defaultTransport' => $this->defaultTransport,
+                    'isIncorrectTransportSelected' => $isIncorrectTransportSelected,
                 ],
                 'contentTemplate' => 'CustomEmailSettingsBundle:Settings:list.html.php'
             ]

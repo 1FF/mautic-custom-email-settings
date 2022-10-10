@@ -52,7 +52,10 @@ class SendGridApiFacade implements SwiftmailerFacadeInterface
         $emailId = MultipleServicesTransport::getEmailId($message);
         $customApiKey = null;
 
-        if ($emailId) {
+        if (
+            $emailId
+            && $this->customEmailSettingsService->getCurrentMailerTransport() == 'mautic.transport.multiple'
+        ) {
             $customApiKey = $this->customEmailSettingsService->getCustomApiKey($emailId);
         }
 

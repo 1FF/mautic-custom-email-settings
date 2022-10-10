@@ -2,11 +2,21 @@
 
 namespace MauticPlugin\CustomEmailSettingsBundle\Service;
 
-use Mautic\CoreBundle\Loader\ParameterLoader;
 
 class CustomEmailSettingsService
 {
     private string $settingsFile = __DIR__.'/../Config/email_keys_settings.json';
+
+    private $systemParams = [];
+
+    public function __construct()
+    {
+        require __DIR__ . "/../../../app/config/local.php";
+
+        if (isset($parameters)) {
+            $this->systemParams = $parameters;
+        }
+    }
 
     public function addCustomApiKey(int $id, string $key, string $transport)
     {
@@ -58,16 +68,25 @@ class CustomEmailSettingsService
 
     public function getDefaultApiKey()
     {
-        require __DIR__ . "/../../../app/config/local.php";
-        if (isset($parameters)) {
-            return !empty($parameters['mailer_api_key']) ? $parameters['mailer_api_key'] : null;
-        }
-
-        return  null;
+        return array_key_exists('mailer_api_key', $this->systemParams)
+            ? $this->systemParams['mailer_api_key']
+            : null;
     }
 
     public function getAllCustomApiKeys()
     {
+        if (!file_exists($this->settingsFile))
+        {
+            file_put_contents($this->settingsFile, '{}');
+        }
+
         return json_decode(file_get_contents($this->settingsFile), true);
+    }
+
+    public function getCurrentMailerTransport()
+    {
+        return array_key_exists('mailer_transport', $this->systemParams)
+            ? $this->systemParams['mailer_transport']
+            : null;
     }
 }
