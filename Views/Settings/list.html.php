@@ -75,16 +75,24 @@ $view['slots']->set('headerTitle', 'Email API Keys');
       <tbody style="min-height: 60vh;">
 
       <?php foreach ($items as $item): ?>
-        <tr>
-          <form class="form-inline"
-                action="<?php echo $view['router']->path('mautic_custom_email_settings_set_key'); ?>" method="post">
-            <input type="hidden" value="<?= $item->getId() ?>" name="email_id">
+        <form
+            class="form-inline"
+            id="form-<?= $item->getId() ?>"
+            action="<?php echo $view['router']->path('mautic_custom_email_settings_set_key'); ?>"
+            method="post">
+          <input type="hidden" value="<?= $item->getId() ?>" name="email_id" form="form-<?= $item->getId() ?>">
+        </form>
+          <tr>
             <td><?php echo $item->getId(); ?></td>
             <td><?php echo $item->getName(); ?></td>
             <td><?php echo $item->getFromAddress(); ?></td>
             <td><?php echo $item->getFromName(); ?></td>
             <td>
-              <select class="form-control" name="custom_transport" id="custom_transport">
+              <select
+                  class="form-control"
+                  name="custom_transport"
+                  id="custom_transport-<?= $item->getId() ?>"
+                  form="form-<?= $item->getId() ?>">
                 <option value="<?= $defaultTransport ?>">Not selected</option>
                 <option
                     <?php if (isset($keys[$item->getId()])): ?>
@@ -105,12 +113,12 @@ $view['slots']->set('headerTitle', 'Email API Keys');
                 <input class="form-control" style="width: 100%;" type="text"
                        value="<?= isset($keys[$item->getId()]) ? $keys[$item->getId()]['key'] : '' ?>"
                        name="custom_api_key"
-                       placeholder="API key - if not specified, will be used default">
+                       placeholder="API key - if not specified, will be used default"
+                       form="form-<?= $item->getId() ?>">
               </div>
-              <button type="submit" class="btn btn-primary">Confirm</button>
+              <button type="submit" class="btn btn-primary" form="form-<?= $item->getId() ?>">Confirm</button>
             </td>
-          </form>
-        </tr>
+          </tr>
       <?php endforeach; ?>
       </tbody>
     </table>

@@ -2,12 +2,11 @@
 
 namespace MauticPlugin\CustomEmailSettingsBundle\Service;
 
-
 class CustomEmailSettingsService
 {
-    private string $settingsFile = __DIR__.'/../Config/email_keys_settings.json';
+    private string $settingsFile = __DIR__.'/../../../var/spool/email_keys_settings.json';
 
-    private $systemParams = [];
+    private array $systemParams = [];
 
     public function __construct()
     {
@@ -16,6 +15,8 @@ class CustomEmailSettingsService
         if (isset($parameters)) {
             $this->systemParams = $parameters;
         }
+
+        if (!file_exists($this->settingsFile)) $this->storeSettings([]);
     }
 
     public function addCustomApiKey(int $id, string $key, string $transport)
@@ -29,7 +30,7 @@ class CustomEmailSettingsService
             "transport" => $transport
         ];
 
-        file_put_contents($this->settingsFile, json_encode($settings, JSON_PRETTY_PRINT));
+        $this->storeSettings($settings);
 
         return true;
     }
@@ -60,7 +61,7 @@ class CustomEmailSettingsService
 
         if (array_key_exists($id, $settings)) {
             unset($settings[$id]);
-            file_put_contents($this->settingsFile, json_encode($settings, JSON_PRETTY_PRINT));
+            $this->storeSettings($settings);
         }
 
         return true;
@@ -75,11 +76,6 @@ class CustomEmailSettingsService
 
     public function getAllCustomApiKeys()
     {
-        if (!file_exists($this->settingsFile))
-        {
-            file_put_contents($this->settingsFile, '{}');
-        }
-
         return json_decode(file_get_contents($this->settingsFile), true);
     }
 
@@ -88,5 +84,18 @@ class CustomEmailSettingsService
         return array_key_exists('mailer_transport', $this->systemParams)
             ? $this->systemParams['mailer_transport']
             : null;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function storeSettings(array $settings)
+    {
+        try {
+            file_put_contents($this->settingsFile, json_encode($settings, JSON_PRETTY_PRINT));
+        } catch (\Exception $e) {
+            error_log($e);
+            throw new \Exception($e->getMessage());
+        }
     }
 }

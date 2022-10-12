@@ -3,12 +3,12 @@ This plugin allows Mautic to switch between different email services - Sparkpost
 
 ## Installation via .zip
 1. Download the [master.zip](https://github.com/1FF/mautic-custom-email-settings/archive/master.zip), extract it into the `plugins/` directory and rename the new directory to `CustomEmailSettingsBundle`.
-2. Clear the cache via console command `php app/console cache:clear --env=prod` (might take a while) *OR* manually delete the `app/cache/prod` directory.
+2. Clear the cache via console command `php bin/console cache:clear --env=prod` (might take a while) *OR* manually delete the `app/cache/prod` directory.
 
 ## Update
 1. Remove `plugins/CustomEmailSettingsBundle` directory.
 2. Download the [master.zip](https://github.com/1FF/mautic-custom-email-settings/archive/master.zip), extract it into the `plugins/` directory and rename the new directory to `CustomEmailSettingsBundle`.
-3. Clear the cache via console command `php app/console cache:clear --env=prod` (might take a while) *OR* manually delete the `app/cache/prod` directory.
+3. Clear the cache via console command `php bin/console cache:clear --env=prod` (might take a while) *OR* manually delete the `app/cache/prod` directory.
 4. Run `php bin/console mautic:plugins:install` in root Mautic directory.
 
 ## Configuration
