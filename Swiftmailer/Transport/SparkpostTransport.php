@@ -540,7 +540,7 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
 
     public function isStarted()
     {
-        // TODO: Implement isStarted() method.
+        return $this->started;
     }
 
     public function stop()
