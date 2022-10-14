@@ -2,10 +2,12 @@
 
 namespace MauticPlugin\CustomEmailSettingsBundle\Swiftmailer\Transport;
 
+use Mautic\EmailBundle\Swiftmailer\Message\MauticMessage;
 use Mautic\EmailBundle\Swiftmailer\Transport\AbstractTokenArrayTransport;
 use Mautic\EmailBundle\Swiftmailer\Transport\CallbackTransportInterface;
 use Mautic\EmailBundle\Swiftmailer\Transport\TokenTransportInterface;
 use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
+use Swift_Message;
 use Symfony\Component\HttpFoundation\Request;
 use Swift_Events_EventListener;
 
@@ -52,12 +54,20 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
 
     public static function getEmailId(\Swift_Mime_SimpleMessage $message): ?int
     {
-        $metadata = $message->getMetadata();
-        $mSet = [];
+        if ($message instanceof MauticMessage) {
+            $metadata = $message->getMetadata();
+            $mSet = [];
 
-        if (!empty($metadata)) $mSet = reset($metadata);
+            if (!empty($metadata)) $mSet = reset($metadata);
 
-        if (isset($mSet['emailId']))  return (int) $mSet['emailId'];
+            if (isset($mSet['emailId']))  return (int) $mSet['emailId'];
+        }
+
+        if ($message instanceof Swift_Message) {
+            $id = $message->getHeaders()->get('x-email-id')->getFieldBody();
+
+            if (intval($id))  return intval($id);
+        }
 
         return null;
     }

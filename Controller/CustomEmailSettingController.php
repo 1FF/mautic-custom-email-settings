@@ -37,17 +37,15 @@ class CustomEmailSettingController extends CommonController
             $isIncorrectTransportSelected = true;
         }
 
-        return $this->delegateView(
-            [
-                'viewParameters' => [
-                    'items' => $emails,
-                    'keys' => $keys,
-                    'defaultTransport' => $this->defaultTransport,
-                    'isIncorrectTransportSelected' => $isIncorrectTransportSelected,
-                ],
-                'contentTemplate' => 'CustomEmailSettingsBundle:Settings:list.html.php'
-            ]
-        );
+        return $this->delegateView([
+            'viewParameters' => [
+                'items' => $emails,
+                'keys' => $keys,
+                'defaultTransport' => $this->defaultTransport,
+                'isIncorrectTransportSelected' => $isIncorrectTransportSelected,
+            ],
+            'contentTemplate' => 'CustomEmailSettingsBundle:Settings:list.html.php'
+        ]);
     }
 
     public function setKeyAction()
