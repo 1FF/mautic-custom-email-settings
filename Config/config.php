@@ -3,7 +3,7 @@
 return [
     'name' => 'Custom Email Settings',
     'description' => 'Additional settings for emails to use different api key',
-    'version' => '0.0.1',
+    'version' => '2.0',
     'author' => '1FF',
     'routes' => [
         'main' => [
@@ -36,7 +36,8 @@ return [
                 'class' => \MauticPlugin\CustomEmailSettingsBundle\Controller\CustomEmailSettingController::class,
                 'arguments' => [
                     'mautic.custom.email.settings.service',
-                    'mautic.core.service.flashbag'
+                    'mautic.core.service.flashbag',
+                    '%mautic.mailer_custom_default_transport%',
                 ]
             ]
         ],
@@ -45,9 +46,25 @@ return [
         'other' => [
             'mautic.custom.email.settings.service' => [
                 'class' => \MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService::class,
-            ]
-        ]
+            ],
+            'mautic.transport.multiple' => [
+                'class' => MauticPlugin\CustomEmailSettingsBundle\Swiftmailer\Transport\MultipleServicesTransport::class,
+                'arguments' => [
+                    'mautic.transport.sparkpost',
+                    'mautic.transport.sendgrid_api',
+                    'mautic.custom.email.settings.service',
+                    '%mautic.mailer_custom_default_transport%',
+                ],
+                'tagArguments' => [
+                    \Mautic\EmailBundle\Model\TransportType::TRANSPORT_ALIAS => 'Multiple Transport (default: Sparkpost)',
+                    \Mautic\EmailBundle\Model\TransportType::FIELD_API_KEY => true,
+                ],
+                'tag' => 'mautic.email_transport',
+                'serviceAlias' => 'swiftmailer.mailer.transport.%s'
+            ],
+        ],
     ],
     'parameters' => [
+        'mailer_custom_default_transport' => 'mautic.transport.sparkpost'
     ]
 ];

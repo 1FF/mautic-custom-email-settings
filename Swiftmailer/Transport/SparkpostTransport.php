@@ -15,7 +15,7 @@ use Swift_Events_EventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Translation\TranslatorInterface;
 
-class OverrideSparkpostTransport extends AbstractTokenArrayTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
+class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
 {
     /**
      * @var string|null
@@ -130,7 +130,11 @@ class OverrideSparkpostTransport extends AbstractTokenArrayTransport implements 
 
             $overrideApiKey = null;
 
-            if (!empty($sparkPostMessage['emailId']) && is_int($sparkPostMessage['emailId'])) {
+            if (
+                !empty($sparkPostMessage['emailId'])
+                && is_int($sparkPostMessage['emailId'])
+                && $this->customEmailSettingsService->getCurrentMailerTransport() == 'mautic.transport.multiple'
+            ) {
                 $overrideApiKey = $this->customEmailSettingsService->getCustomApiKey($sparkPostMessage['emailId']);
             }
 
@@ -195,7 +199,7 @@ class OverrideSparkpostTransport extends AbstractTokenArrayTransport implements 
             }
 
             $campaignId = $this->extractCampaignId($metadataSet);
-            $emailId = $this->extractEmailId($metadataSet);
+            $emailId = MultipleServicesTransport::getEmailId($message);
         }
 
         $message = $this->messageToArray($mauticTokens, $mergeVarPlaceholders, true);
@@ -526,14 +530,6 @@ class OverrideSparkpostTransport extends AbstractTokenArrayTransport implements 
         return substr($id, 0, 64);
     }
 
-    private function extractEmailId(array $metadataSet)
-    {
-        $id = '';
-        if (!empty($metadataSet['emailId']))  $id = $metadataSet['emailId'];
-
-        return $id;
-    }
-
     /**
      * @return bool
      */
@@ -544,7 +540,7 @@ class OverrideSparkpostTransport extends AbstractTokenArrayTransport implements 
 
     public function isStarted()
     {
-        // TODO: Implement isStarted() method.
+        return $this->started;
     }
 
     public function stop()

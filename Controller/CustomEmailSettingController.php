@@ -8,14 +8,21 @@ use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
 
 class CustomEmailSettingController extends CommonController
 {
-    private $service;
+    private CustomEmailSettingsService $service;
 
-    private $flashBag;
+    private FlashBag $flashBag;
 
-    public function __construct(CustomEmailSettingsService $service, FlashBag $flashBag)
+    private string $defaultTransport;
+
+    public function __construct(
+        CustomEmailSettingsService $service,
+        FlashBag $flashBag,
+        string $defaultTransport
+    )
     {
         $this->service = $service;
         $this->flashBag = $flashBag;
+        $this->defaultTransport = $defaultTransport;
     }
 
     public function indexAction()
@@ -24,23 +31,29 @@ class CustomEmailSettingController extends CommonController
         $repo = $em->getRepository('MauticEmailBundle:Email');
         $emails = $repo->findAll();
         $keys = $this->service->getAllCustomApiKeys();
+        $isIncorrectTransportSelected = false;
 
-        return $this->delegateView(
-            [
-                'viewParameters' => [
-                    'items' => $emails,
-                    'keys' => $keys
-                ],
-                'contentTemplate' => 'CustomEmailSettingsBundle:Settings:list.html.php'
-            ]
-        );
+        if ($this->service->getCurrentMailerTransport() != 'mautic.transport.multiple') {
+            $isIncorrectTransportSelected = true;
+        }
+
+        return $this->delegateView([
+            'viewParameters' => [
+                'items' => $emails,
+                'keys' => $keys,
+                'defaultTransport' => $this->defaultTransport,
+                'isIncorrectTransportSelected' => $isIncorrectTransportSelected,
+            ],
+            'contentTemplate' => 'CustomEmailSettingsBundle:Settings:list.html.php'
+        ]);
     }
 
     public function setKeyAction()
     {
         if ($this->request->getMethod() == 'POST') {
             $emailId = $this->request->get('email_id');
-            $key = $this->request->get('replace_api_key');
+            $key = $this->request->get('custom_api_key');
+            $transport = $this->request->get('custom_transport');
 
             if (empty($key)) {
                 $this->service->deleteCustomApiKey($emailId);
@@ -49,7 +62,7 @@ class CustomEmailSettingController extends CommonController
                 return $this->redirectToRoute('mautic_custom_email_settings_index');
             }
 
-            $this->service->addCustomApiKey($emailId, $key);
+            $this->service->addCustomApiKey($emailId, $key, $transport);
             $this->flashBag->add('API key for email #' . $emailId . ' added');
 
             return $this->redirectToRoute('mautic_custom_email_settings_index');
