@@ -64,9 +64,13 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
         }
 
         if ($message instanceof Swift_Message) {
-            $id = $message->getHeaders()->get('x-email-id')->getFieldBody();
+            $id = null;
 
-            if (intval($id))  return intval($id);
+            if ($message->getHeaders()->get('x-email-id')) {
+                $id = $message->getHeaders()->get('x-email-id')->getFieldBody();
+            }
+
+            return $id ? intval($id) : null;
         }
 
         return null;
