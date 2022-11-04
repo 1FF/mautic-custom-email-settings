@@ -27,8 +27,7 @@ class CustomEmailSettingController extends CommonController
 
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
-        $repo = $em->getRepository('MauticEmailBundle:Email');
+        $repo = $this->getRepository();
         $emails = $repo->findAll();
         $keys = $this->service->getAllCustomApiKeys();
         $isIncorrectTransportSelected = false;
@@ -51,16 +50,19 @@ class CustomEmailSettingController extends CommonController
     public function setKeyAction()
     {
         if ($this->request->getMethod() == 'POST') {
-            $emailId = $this->request->get('email_id');
+            $emailId = (int) $this->request->get('email_id');
             $key = $this->request->get('custom_api_key');
             $transport = $this->request->get('custom_transport');
 
             if (empty($key)) {
                 $this->service->deleteCustomApiKey($emailId);
+                $this->saveHeaders([], $emailId);
                 $this->flashBag->add('API key for email #' . $emailId . ' deleted');
 
                 return $this->redirectToRoute('mautic_custom_email_settings_index');
             }
+
+            $this->saveHeaders(['id' => $emailId], $emailId);
 
             $this->service->addCustomApiKey($emailId, $key, $transport);
             $this->flashBag->add('API key for email #' . $emailId . ' added');
@@ -69,5 +71,19 @@ class CustomEmailSettingController extends CommonController
         }
 
         return $this->redirectToRoute('mautic_custom_email_settings_index');
+    }
+
+    private function getRepository()
+    {
+        $em = $this->getDoctrine()->getManager();
+        return $em->getRepository('MauticEmailBundle:Email');
+    }
+
+    private function saveHeaders(array $headers, int $emailId)
+    {
+        $model  = $this->getModel('email');
+        $email = $model->getEntity($emailId);
+        $email->setHeaders($headers);
+        $model->saveEntity($email);
     }
 }

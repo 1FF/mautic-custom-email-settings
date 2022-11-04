@@ -25,7 +25,17 @@ $view['slots']->set('headerTitle', 'Email API Keys');
               'MauticCoreBundle:Helper:tableheader.html.php',
               [
                   'sessionVar' => 'email',
-                  'text' => 'mautic.core.id',
+                  'text' => 'Email ID',
+                  'class' => 'visible-md visible-lg col-email-id',
+              ]
+          );
+          ?>
+          <?php
+          echo $view->render(
+              'MauticCoreBundle:Helper:tableheader.html.php',
+              [
+                  'sessionVar' => 'email',
+                  'text' => 'Custom Headers ID',
                   'class' => 'visible-md visible-lg col-email-id',
               ]
           );
@@ -84,6 +94,7 @@ $view['slots']->set('headerTitle', 'Email API Keys');
         </form>
           <tr>
             <td><?php echo $item->getId(); ?></td>
+            <td><?php if (array_key_exists('id', $item->getHeaders())) echo $item->getHeaders()['id'] ?></td>
             <td><?php echo $item->getName(); ?></td>
             <td><?php echo $item->getFromAddress(); ?></td>
             <td><?php echo $item->getFromName(); ?></td>
