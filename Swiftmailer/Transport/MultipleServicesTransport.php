@@ -52,25 +52,10 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
         $this->setCurrentTransportToDefault();
     }
 
-    public static function getEmailId(\Swift_Mime_SimpleMessage $message): ?int
+    public static function getEmailId($message): ?int
     {
-        if ($message instanceof MauticMessage) {
-            $metadata = $message->getMetadata();
-            $mSet = [];
-
-            if (!empty($metadata)) $mSet = reset($metadata);
-
-            if (isset($mSet['emailId']))  return (int) $mSet['emailId'];
-        }
-
-        if ($message instanceof Swift_Message) {
-            $id = null;
-
-            if ($message->getHeaders()->get('x-email-id')) {
-                $id = $message->getHeaders()->get('x-email-id')->getFieldBody();
-            }
-
-            return $id ? intval($id) : null;
+        if ($message->getHeaders()->get('id')) {
+            return (int) $message->getHeaders()->get('id')->getFieldBody();
         }
 
         return null;
