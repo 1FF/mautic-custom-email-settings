@@ -127,15 +127,14 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
 
         try {
             $sparkPostMessage = $this->getSparkPostMessage($message);
-
+            $emailId = MultipleServicesTransport::getEmailId($message);
             $overrideApiKey = null;
 
             if (
-                !empty($sparkPostMessage['emailId'])
-                && is_int($sparkPostMessage['emailId'])
+                $emailId
                 && $this->customEmailSettingsService->getCurrentMailerTransport() == 'mautic.transport.multiple'
             ) {
-                $overrideApiKey = $this->customEmailSettingsService->getCustomApiKey($sparkPostMessage['emailId']);
+                $overrideApiKey = $this->customEmailSettingsService->getCustomApiKey($emailId);
             }
 
             $sparkPostClient = $this->createSparkPost($overrideApiKey);
@@ -184,7 +183,6 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
         $metadata      = $this->getMetadata();
         $mauticTokens  = $mergeVars = $mergeVarPlaceholders = [];
         $campaignId    = '';
-        $emailId       = '';
 
         // Sparkpost uses {{ name }} for tokens so Mautic's need to be converted; although using their {{{ }}} syntax to prevent HTML escaping
         if (!empty($metadata)) {
@@ -199,7 +197,6 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
             }
 
             $campaignId = $this->extractCampaignId($metadataSet);
-            $emailId = MultipleServicesTransport::getEmailId($message);
         }
 
         $message = $this->messageToArray($mauticTokens, $mergeVarPlaceholders, true);
@@ -309,7 +306,6 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
             'inline_css'  => $inlineCss,
             'tags'        => $tags,
             'campaign_id' => $campaignId,
-            'emailId'     => $emailId
         ];
 
         if (!empty($message['attachments'])) {
