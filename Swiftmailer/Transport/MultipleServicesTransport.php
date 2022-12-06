@@ -120,7 +120,7 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
      */
     public function getCallbackPath()
     {
-        return 'multiple';
+        return $this->currentTransport->getCallbackPath();
     }
 
     /**
