@@ -317,10 +317,10 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
         }
 
         $sparkPostMessage['options'] = [
-            'open_tracking'  => false,
-            'click_tracking' => false,
+            'open_tracking'  => true,
+            'click_tracking' => true,
         ];
-
+        
         return $sparkPostMessage;
     }
 
