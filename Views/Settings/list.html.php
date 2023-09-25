@@ -134,4 +134,8 @@ $view['slots']->set('headerTitle', 'Email API Keys');
       </tbody>
     </table>
 
+<?php else: ?>
+  <div class="alert alert-danger" role="alert">
+    Please create some emails first.
+  </div>
 <?php endif; ?>
