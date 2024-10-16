@@ -2,68 +2,32 @@
 
 namespace MauticPlugin\CustomEmailSettingsBundle\Swiftmailer\Transport;
 
-use Mautic\EmailBundle\Swiftmailer\Message\MauticMessage;
 use Mautic\EmailBundle\Swiftmailer\Transport\AbstractTokenArrayTransport;
 use Mautic\EmailBundle\Swiftmailer\Transport\CallbackTransportInterface;
 use Mautic\EmailBundle\Swiftmailer\Transport\TokenTransportInterface;
-use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
+use MauticPlugin\CustomEmailSettingsBundle\Service\TransportFactory;
 use Swift_Message;
+use Swift_Mime_SimpleMessage;
+use Swift_TransportException;
 use Symfony\Component\HttpFoundation\Request;
 use Swift_Events_EventListener;
 
 class MultipleServicesTransport extends AbstractTokenArrayTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
 {
-    /**
-     * @var SparkpostTransport
-     */
-    private SparkpostTransport $sparkpostTransport;
+    private TransportFactory $transportFactory;
 
-    /**
-     * @var SendgridApiTransport
-     */
-    private SendgridApiTransport $sendgridTransport;
-
-    /**
-     * @var string
-     */
-    private string $defaultTransportName;
-
-    /**
-     * @var SparkpostTransport|SendgridApiTransport
-     */
+    /** @var SparkpostTransport|SendgridApiTransport */
     private $currentTransport;
 
-    /**
-     * @var CustomEmailSettingsService
-     */
-    private CustomEmailSettingsService $customEmailSettingsService;
-
-    public function __construct(
-        SparkpostTransport $sparkpostTransport,
-        SendgridApiTransport $sendgridApiTransport,
-        CustomEmailSettingsService $customEmailSettingsService,
-        $defaultTransportName
-    )
+    public function __construct(TransportFactory $transportFactory)
     {
-        $this->sparkpostTransport = $sparkpostTransport;
-        $this->sendgridTransport = $sendgridApiTransport;
-        $this->customEmailSettingsService = $customEmailSettingsService;
-        $this->defaultTransportName = $defaultTransportName;
-        $this->setCurrentTransportToDefault();
-    }
-
-    public static function getEmailId($message): ?int
-    {
-        if ($message->getHeaders()->get('id')) {
-            return (int) $message->getHeaders()->get('id')->getFieldBody();
-        }
-
-        return null;
+        $this->transportFactory = $transportFactory;
+        $this->currentTransport = $this->transportFactory->makeDefaultTransport();
     }
 
     /**
      * Start this Transport mechanism.
-     * @throws \Swift_TransportException
+     * @throws Swift_TransportException
      */
     public function start()
     {
@@ -98,17 +62,16 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
     }
 
     /**
+     * @param Swift_Mime_SimpleMessage $message
      * @param null $failedRecipients
      *
      * @return int
      *
-     * @throws \Exception
+     * @throws Swift_TransportException
      */
-    public function send(\Swift_Mime_SimpleMessage $message, &$failedRecipients = null): int
+    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null): int
     {
-        if ($emailId = self::getEmailId($message)) {
-            $this->setCurrentTransportToCustom($emailId);
-        }
+        $this->setTransportForMessage($message);
 
         return $this->currentTransport->send($message, $failedRecipients);
     }
@@ -145,6 +108,7 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
     /**
      * Get the count for the max number of recipients per batch.
      *
+     * @param Swift_Message $message
      * @param int $toBeAdded Number of emails about to be added
      * @param string $type Type of emails being added (to, cc, bcc)
      *
@@ -155,30 +119,23 @@ class MultipleServicesTransport extends AbstractTokenArrayTransport implements \
         return $this->currentTransport->getBatchRecipientCount($message, $toBeAdded, $type);
     }
 
+    /**
+     * @param Swift_Events_EventListener $plugin
+     * @return void
+     */
     public function registerPlugin(Swift_Events_EventListener $plugin)
     {
         $this->currentTransport->registerPlugin($plugin);
     }
 
-    private function setCurrentTransportToDefault()
+    /**
+     * Set the transport for the current message based on the product and custom API settings.
+     *
+     * @param Swift_Mime_SimpleMessage $message
+     * @return void
+     */
+    private function setTransportForMessage(Swift_Mime_SimpleMessage $message)
     {
-        $this->currentTransport = $this->getAvailableTransports()[$this->defaultTransportName];
-    }
-
-    private function setCurrentTransportToCustom(int $emailId)
-    {
-        $transport = $this->customEmailSettingsService->getCustomTransport($emailId);
-
-        if ($transport) {
-            $this->currentTransport = $this->getAvailableTransports()[$transport];
-        }
-    }
-
-    private function getAvailableTransports(): array
-    {
-        return [
-            'mautic.transport.sendgrid_api' => $this->sendgridTransport,
-            'mautic.transport.sparkpost' => $this->sparkpostTransport
-        ];
+        $this->currentTransport = $this->transportFactory->makeTransportForMessage($message);
     }
 }

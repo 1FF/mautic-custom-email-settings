@@ -7,30 +7,19 @@ use Mautic\EmailBundle\Swiftmailer\Transport\CallbackTransportInterface;
 use Mautic\EmailBundle\Swiftmailer\Transport\TokenTransportInterface;
 use MauticPlugin\CustomEmailSettingsBundle\Swiftmailer\SendGrid\SendGridApiFacade;
 use Swift_Events_EventListener;
+use Swift_Events_SimpleEventDispatcher;
 use Swift_Mime_SimpleMessage;
 use Symfony\Component\HttpFoundation\Request;
 
 class SendgridApiTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
 {
-    /**
-     * @var SendGridApiFacade
-     */
-    private $sendGridApiFacade;
+    private SendGridApiFacade $sendGridApiFacade;
 
-    /**
-     * @var \Swift_Events_SimpleEventDispatcher
-     */
-    private $swiftEventDispatcher;
+    private Swift_Events_SimpleEventDispatcher $swiftEventDispatcher;
 
-    /**
-     * @var bool
-     */
-    private $started = false;
+    private bool $started = false;
 
-    /**
-     * @var SendGridApiCallback
-     */
-    private $sendGridApiCallback;
+    private SendGridApiCallback $sendGridApiCallback;
 
     public function __construct(SendGridApiFacade $sendGridApiFacade, SendGridApiCallback $sendGridApiCallback)
     {
@@ -66,6 +55,17 @@ class SendgridApiTransport implements \Swift_Transport, TokenTransportInterface,
     }
 
     /**
+     * Set override API key
+     *
+     * @param string|null $overrideApiKey
+     * @return void
+     */
+    public function setOverrideApiKey(string $overrideApiKey): void
+    {
+        $this->sendGridApiFacade->setOverrideApiKey($overrideApiKey);
+    }
+
+    /**
      * Send the given Message.
      *
      * Recipient/sender data will be retrieved from the Message API.
@@ -93,12 +93,12 @@ class SendgridApiTransport implements \Swift_Transport, TokenTransportInterface,
     }
 
     /**
-     * @return \Swift_Events_SimpleEventDispatcher
+     * @return Swift_Events_SimpleEventDispatcher
      */
     private function getDispatcher()
     {
         if (null === $this->swiftEventDispatcher) {
-            $this->swiftEventDispatcher = new \Swift_Events_SimpleEventDispatcher();
+            $this->swiftEventDispatcher = new Swift_Events_SimpleEventDispatcher();
         }
 
         return $this->swiftEventDispatcher;
