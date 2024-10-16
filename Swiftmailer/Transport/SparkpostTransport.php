@@ -17,42 +17,31 @@ use Symfony\Component\Translation\TranslatorInterface;
 
 class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_Transport, TokenTransportInterface, CallbackTransportInterface
 {
-    /**
-     * @var string|null
-     */
-    private $apiKey;
+    private ?string $apiKey;
 
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
+    private ?string $overrideApiKey = null;
 
-    /**
-     * @var TransportCallback
-     */
-    private $transportCallback;
+    private TranslatorInterface $translator;
 
-    /**
-     * @var SparkpostFactoryInterface
-     */
-    private $sparkpostFactory;
+    private TransportCallback $transportCallback;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private SparkpostFactoryInterface $sparkpostFactory;
 
-    private $customEmailSettingsService;
+    private LoggerInterface $logger;
 
     /**
      * @param string $apiKey
+     * @param TranslatorInterface $translator
+     * @param TransportCallback $transportCallback
+     * @param SparkpostFactoryInterface $sparkpostFactory
+     * @param LoggerInterface $logger
      */
     public function __construct(
-        $apiKey,
-        TranslatorInterface $translator,
-        TransportCallback $transportCallback,
+        string                    $apiKey,
+        TranslatorInterface       $translator,
+        TransportCallback         $transportCallback,
         SparkpostFactoryInterface $sparkpostFactory,
-        LoggerInterface $logger
+        LoggerInterface           $logger
     ) {
         $this->setApiKey($apiKey);
 
@@ -60,7 +49,6 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
         $this->transportCallback = $transportCallback;
         $this->sparkpostFactory  = $sparkpostFactory;
         $this->logger            = $logger;
-        $this->customEmailSettingsService = new CustomEmailSettingsService();
     }
 
     /**
@@ -69,6 +57,17 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
     public function setApiKey($apiKey)
     {
         $this->apiKey = $apiKey;
+    }
+
+    /**
+     * Set override API key
+     *
+     * @param string|null $overrideApiKey
+     * @return void
+     */
+    public function setOverrideApiKey(string $overrideApiKey): void
+    {
+        $this->overrideApiKey = $overrideApiKey;
     }
 
     /**
@@ -127,17 +126,8 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
 
         try {
             $sparkPostMessage = $this->getSparkPostMessage($message);
-            $emailId = MultipleServicesTransport::getEmailId($message);
-            $overrideApiKey = null;
 
-            if (
-                $emailId
-                && $this->customEmailSettingsService->getCurrentMailerTransport() == 'mautic.transport.multiple'
-            ) {
-                $overrideApiKey = $this->customEmailSettingsService->getCustomApiKey($emailId);
-            }
-
-            $sparkPostClient = $this->createSparkPost($overrideApiKey);
+            $sparkPostClient = $this->createSparkPost($this->overrideApiKey);
 
             $this->checkTemplateIsValid($sparkPostClient, $sparkPostMessage);
 
@@ -320,7 +310,7 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
             'open_tracking'  => true,
             'click_tracking' => true,
         ];
-        
+
         return $sparkPostMessage;
     }
 
