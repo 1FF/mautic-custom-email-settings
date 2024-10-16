@@ -29,7 +29,7 @@ class CustomEmailSettingController extends CommonController
     {
         $repo = $this->getRepository();
         $emails = $repo->findAll();
-        $keys = $this->service->getAllCustomApiKeys();
+        $keys = $this->service->getSettings();
         $isIncorrectTransportSelected = false;
 
         if ($this->service->getCurrentMailerTransport() != 'mautic.transport.multiple') {
@@ -47,15 +47,18 @@ class CustomEmailSettingController extends CommonController
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setKeyAction()
     {
         if ($this->request->getMethod() == 'POST') {
-            $emailId = (int) $this->request->get('email_id');
+            $emailId = $this->request->get('email_id');
             $key = $this->request->get('custom_api_key');
             $transport = $this->request->get('custom_transport');
 
             if (empty($key)) {
-                $this->service->deleteCustomApiKey($emailId);
+                $this->service->deleteSettingsRow($emailId);
                 $this->saveHeaders([], $emailId);
                 $this->flashBag->add('API key for email #' . $emailId . ' deleted');
 

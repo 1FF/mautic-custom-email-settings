@@ -10,27 +10,17 @@ use Mautic\EmailBundle\Swiftmailer\SendGrid\SendGridWrapper;
 use Mautic\EmailBundle\Swiftmailer\SwiftmailerFacadeInterface;
 use MauticPlugin\CustomEmailSettingsBundle\Service\CustomEmailSettingsService;
 use MauticPlugin\CustomEmailSettingsBundle\Swiftmailer\Transport\MultipleServicesTransport;
+use Swift_Mime_SimpleMessage;
 
 class SendGridApiFacade implements SwiftmailerFacadeInterface
 {
-    /**
-     * @var SendGridWrapper
-     */
-    private $sendGridWrapper;
+    private ?string $overrideApiKey = null;
 
-    /**
-     * @var SendGridApiMessage
-     */
-    private $sendGridApiMessage;
+    private SendGridWrapper $sendGridWrapper;
 
-    /**
-     * @var SendGridApiResponse
-     */
-    private $sendGridApiResponse;
+    private SendGridApiMessage $sendGridApiMessage;
 
-    private $customEmailSettingsService;
-
-    private $overrideApiKey;
+    private SendGridApiResponse $sendGridApiResponse;
 
     public function __construct(
         SendGridWrapper $sendGridWrapper,
@@ -40,37 +30,27 @@ class SendGridApiFacade implements SwiftmailerFacadeInterface
         $this->sendGridWrapper     = $sendGridWrapper;
         $this->sendGridApiMessage  = $sendGridApiMessage;
         $this->sendGridApiResponse = $sendGridApiResponse;
-        $this->customEmailSettingsService = new CustomEmailSettingsService();
-        $this->overrideApiKey = null;
+    }
+
+    /**
+     * Set override API key
+     *
+     * @param string $overrideApiKey
+     * @return void
+     */
+    public function setOverrideApiKey(string $overrideApiKey): void
+    {
+        if ($overrideApiKey != $this->overrideApiKey) {
+            $this->overrideApiKey = $overrideApiKey;
+            $this->replaceApiKey($this->overrideApiKey);
+        }
     }
 
     /**
      * @throws \Swift_TransportException
      */
-    public function send(\Swift_Mime_SimpleMessage $message)
+    public function send(Swift_Mime_SimpleMessage $message)
     {
-        $emailId = MultipleServicesTransport::getEmailId($message);
-        $customApiKey = null;
-
-        if (
-            $emailId
-            && $this->customEmailSettingsService->getCurrentMailerTransport() == 'mautic.transport.multiple'
-        ) {
-            $customApiKey = $this->customEmailSettingsService->getCustomApiKey($emailId);
-        }
-
-        // If custom API key is specified and different from the previous one
-        if ($customApiKey && $this->overrideApiKey != $customApiKey) {
-            $this->overrideApiKey = $customApiKey;
-            $this->replaceApiKey($this->overrideApiKey);
-        }
-
-        // If custom API key for the current email is not specified, reset it to the default one
-        if ($this->overrideApiKey && $customApiKey == null) {
-            $this->overrideApiKey = null;
-            $this->replaceApiKey($this->customEmailSettingsService->getDefaultApiKey());
-        }
-
         $mail = $this->sendGridApiMessage->getMessage($message);
 
         $response = $this->sendGridWrapper->send($mail);
