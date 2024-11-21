@@ -94,6 +94,7 @@ class TransportFactory
 
         if ($productSettings) {
             $message->setFrom($productSettings['from_email'], $productSettings['from_name']);
+            $message->setReplyTo($productSettings['from_email'], $productSettings['from_name']);
             $this->setTransportParams($productSettings['transport'], $productSettings['api_key']);
             return;
         }
