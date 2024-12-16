@@ -3,7 +3,7 @@
 return [
     'name' => 'Custom Email Settings',
     'description' => 'Additional settings for emails to use different api key',
-    'version' => '2.1.1',
+    'version' => '2.1.2',
     'author' => '1FF',
     'routes' => [
         'main' => [

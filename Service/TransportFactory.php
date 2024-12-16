@@ -65,7 +65,7 @@ class TransportFactory
      */
     public function makeDefaultTransport()
     {
-        $this->setTransportParams($this->defaultTransportName, $this->defaultApiKey);
+        $this->setTransportParams($this->defaultTransportName, $this->defaultApiKey, $this->customEmailSettingsService->getDefaultSenderEmail());
 
         return $this->currentTransport;
     }
@@ -95,7 +95,7 @@ class TransportFactory
         if ($productSettings) {
             $message->setFrom($productSettings['from_email'], $productSettings['from_name']);
             $message->setReplyTo($productSettings['from_email'], $productSettings['from_name']);
-            $this->setTransportParams($productSettings['transport'], $productSettings['api_key']);
+            $this->setTransportParams($productSettings['transport'], $productSettings['api_key'], $productSettings['from_email']);
             return;
         }
 
@@ -103,11 +103,11 @@ class TransportFactory
         $customEmailSettings = $emailId ? $this->customEmailSettingsService->getSettingsByEmailId($emailId) : null;
 
         if ($customEmailSettings) {
-            $this->setTransportParams($customEmailSettings['transport'], $customEmailSettings['key']);
+            $this->setTransportParams($customEmailSettings['transport'], $customEmailSettings['key'], $this->getSenderEmail($message));
             return;
         }
 
-        $this->setTransportParams($this->defaultTransportName, $this->defaultApiKey);
+        $this->setTransportParams($this->defaultTransportName, $this->defaultApiKey, $this->getSenderEmail($message));
     }
 
     private function getProductName(Swift_Mime_SimpleMessage $message): ?string
@@ -143,9 +143,15 @@ class TransportFactory
         return null;
     }
 
-    private function setTransportParams(string $transportName, string $overrideApiKey): void
+    private function getSenderEmail(Swift_Mime_SimpleMessage $message): string
+    {
+        return array_key_first($message->getFrom());
+    }
+
+    private function setTransportParams(string $transportName, string $overrideApiKey, string $returnPath): void
     {
         $this->currentTransport = $this->availableTransports()[$transportName];
         $this->currentTransport->setOverrideApiKey($overrideApiKey);
+        $this->currentTransport->setReturnPath($returnPath);
     }
 }
