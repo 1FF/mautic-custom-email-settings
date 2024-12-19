@@ -54,6 +54,16 @@ class AbstractEmailSettingsService
     }
 
     /**
+     * @return string|null
+     */
+    public function getDefaultSenderEmail(): ?string
+    {
+        return array_key_exists('mailer_from_email', $this->systemParams)
+            ? $this->systemParams['mailer_from_email']
+            : null;
+    }
+
+    /**
      * @return array
      */
     public function getSettings(): array

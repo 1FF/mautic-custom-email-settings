@@ -66,6 +66,13 @@ class SendgridApiTransport implements \Swift_Transport, TokenTransportInterface,
     }
 
     /**
+     * @param string $returnPath
+     * @return void
+     */
+    public function setReturnPath(string $returnPath): void
+    {}
+
+    /**
      * Send the given Message.
      *
      * Recipient/sender data will be retrieved from the Message API.

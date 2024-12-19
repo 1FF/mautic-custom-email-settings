@@ -29,6 +29,8 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
 
     private LoggerInterface $logger;
 
+    private ?string $returnPath = null;
+
     /**
      * @param string $apiKey
      * @param TranslatorInterface $translator
@@ -68,6 +70,15 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
     public function setOverrideApiKey(string $overrideApiKey): void
     {
         $this->overrideApiKey = $overrideApiKey;
+    }
+
+    /**
+     * @param string $returnPath
+     * @return void
+     */
+    public function setReturnPath(string $returnPath): void
+    {
+        $this->returnPath = $returnPath;
     }
 
     /**
@@ -296,6 +307,7 @@ class SparkpostTransport extends AbstractTokenArrayTransport implements \Swift_T
             'inline_css'  => $inlineCss,
             'tags'        => $tags,
             'campaign_id' => $campaignId,
+            'return_path' => $this->returnPath,
         ];
 
         if (!empty($message['attachments'])) {
